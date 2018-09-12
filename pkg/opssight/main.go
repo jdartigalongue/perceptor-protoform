@@ -145,10 +145,28 @@ func (ac *Creater) CreateOpsSight(createOpsSight *v1.OpsSight) error {
 func (ac *Creater) Run() {
 	go func() {
 		for {
-			// TODO no way to stop?
-			ac.opssightClient.SynopsysV1().OpsSights(k8s_v1.NamespaceAll).List(meta_v1.ListOptions{})
-			ac.hubClient.SynopsysV1().Hubs(k8s_v1.NamespaceAll).List(meta_v1.ListOptions{})
 			time.Sleep(15 * time.Second)
+			// TODO no way to stop?
+			opsList, err := ac.opssightClient.SynopsysV1().OpsSights(k8s_v1.NamespaceAll).List(meta_v1.ListOptions{})
+			if err != nil {
+				log.Errorf("unable to list opssights: %s", err.Error())
+				continue
+			}
+			hubList, err := ac.hubClient.SynopsysV1().Hubs(k8s_v1.NamespaceAll).List(meta_v1.ListOptions{})
+			if err != nil {
+				log.Errorf("unable to list hubs: %s", err.Error())
+				continue
+			}
+			if len(opsList.Items) == 0 {
+				log.Errorf("no OpsSight found")
+				continue
+			}
+			ops := opsList.Items[0]
+			hubHosts := []string{}
+			for _, h := range hubList.Items {
+				hubHosts = append(hubHosts, h.Status.IP)
+			}
+			perceptor.Post(hubHosts)
 		}
 	}()
 }
