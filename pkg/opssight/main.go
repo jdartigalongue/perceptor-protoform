@@ -25,9 +25,12 @@ import (
 	"time"
 
 	"github.com/blackducksoftware/perceptor-protoform/pkg/api/opssight/v1"
+	hubclientset "github.com/blackducksoftware/perceptor-protoform/pkg/hub/client/clientset/versioned"
 	opssightclientset "github.com/blackducksoftware/perceptor-protoform/pkg/opssight/client/clientset/versioned"
 	"github.com/blackducksoftware/perceptor-protoform/pkg/util"
 
+	k8s_v1 "k8s.io/api/core/v1"
+	meta_v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
 
@@ -39,11 +42,12 @@ type Creater struct {
 	kubeConfig     *rest.Config
 	kubeClient     *kubernetes.Clientset
 	opssightClient *opssightclientset.Clientset
+	hubClient      *hubclientset.Clientset
 }
 
 // NewCreater will instantiate the Creater
-func NewCreater(kubeConfig *rest.Config, kubeClient *kubernetes.Clientset, opssightClient *opssightclientset.Clientset) *Creater {
-	return &Creater{kubeConfig: kubeConfig, kubeClient: kubeClient, opssightClient: opssightClient}
+func NewCreater(kubeConfig *rest.Config, kubeClient *kubernetes.Clientset, opssightClient *opssightclientset.Clientset, hubClient *hubclientset.Clientset) *Creater {
+	return &Creater{kubeConfig: kubeConfig, kubeClient: kubeClient, opssightClient: opssightClient, hubClient: hubClient}
 }
 
 // NewAppDefaults creates a perceptor app configuration object
@@ -136,4 +140,15 @@ func (ac *Creater) CreateOpsSight(createOpsSight *v1.OpsSight) error {
 	}
 	deployer.StartControllers()
 	return nil
+}
+
+func (ac *Creater) Run() {
+	go func() {
+		for {
+			// TODO no way to stop?
+			ac.opssightClient.SynopsysV1().OpsSights(k8s_v1.NamespaceAll).List(meta_v1.ListOptions{})
+			ac.hubClient.SynopsysV1().Hubs(k8s_v1.NamespaceAll).List(meta_v1.ListOptions{})
+			time.Sleep(15 * time.Second)
+		}
+	}()
 }

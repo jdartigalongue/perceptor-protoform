@@ -156,6 +156,7 @@ func (c *ControllerConfig) CreateHandler() {
 		Clientset:         c.protoformConfig.KubeClientSet,
 		OpsSightClientset: c.protoformConfig.customClientSet,
 		Namespace:         c.protoformConfig.Config.Namespace,
+		HubClientset:      c.protoformConfig.HubClientset,
 		CmMutex:           make(chan bool, 1),
 	}
 }

@@ -67,6 +67,7 @@ func runProtoform(configPath string) {
 		KubeConfig:    installer.KubeConfig,
 		KubeClientSet: installer.KubeClientSet,
 		Threadiness:   installer.Config.Threadiness,
+		HubClientset:  hubConfig.HubClientSet,
 	})
 	installer.AddController(opssSightConfig)
 

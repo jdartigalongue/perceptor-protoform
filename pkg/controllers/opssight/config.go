@@ -24,6 +24,7 @@ package opssight
 import (
 	"time"
 
+	hubclientset "github.com/blackducksoftware/perceptor-protoform/pkg/hub/client/clientset/versioned"
 	"github.com/blackducksoftware/perceptor-protoform/pkg/model"
 	opssightclientset "github.com/blackducksoftware/perceptor-protoform/pkg/opssight/client/clientset/versioned"
 	opssightcontroller "github.com/blackducksoftware/perceptor-protoform/pkg/opssight/controller"
@@ -45,6 +46,7 @@ type ProtoformControllerConfig struct {
 	handler         *opssightcontroller.OpsSightHandler
 	controller      *opssightcontroller.Controller
 	customClientSet *opssightclientset.Clientset
+	HubClientset    *hubclientset.Clientset
 	Threadiness     int
 	StopCh          <-chan struct{}
 }
